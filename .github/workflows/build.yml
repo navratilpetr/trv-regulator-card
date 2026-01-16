@@ -1,0 +1,39 @@
+name: Build & Publish Card
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Publish
+    permissions:
+      contents: write  # dovolí akci pushnout výsledek zpět do repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build card (run Rollup/TS)
+        run: npm run build
+
+      - name: Commit & push built dist/
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dist/
+          git commit -m "Automated build: Update dist [skip ci]" || echo "No changes to commit"
+          git push
